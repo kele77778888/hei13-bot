@@ -538,7 +538,7 @@ async def receive_reject_reason(message: Message, state: FSMContext, bot: Bot):
     await message.answer("✅驳回通知已发送")
     await state.clear()
 
-# ==================== Web保活服务 + 机器人主程序 ====================
+# ===================== Web保活服务 + 机器人 =====================
 async def web_handler(request):
     return web.Response(text="Bot running!")
 
@@ -550,13 +550,19 @@ async def bot_main():
     await dp.start_polling(bot)
 
 async def main():
+    # 启动保活网页
     app = web.Application()
     app.add_routes([web.get('/', web_handler)])
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
     await site.start()
-    await bot_main()
+
+    # 后台启动机器人，不阻塞网页
+    asyncio.create_task(bot_main())
+
+    # 一直保持网页运行
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     asyncio.run(main())
