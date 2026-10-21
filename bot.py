@@ -1,4 +1,5 @@
 import asyncio
+import os
 import json
 import logging
 import random
@@ -553,7 +554,7 @@ async def main():
     app.add_routes([web.get('/', web_handler)])
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, host="0.0.0.0", port=PORT)
+    site = web.TCPSite(runner, host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
     await site.start()
     await bot_main()
 
